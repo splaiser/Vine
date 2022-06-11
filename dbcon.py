@@ -6,9 +6,25 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox,
                              QHBoxLayout, QMessageBox, QPushButton, QTableView)
 from PyQt5.QtSql import QSqlTableModel
-
+from PyQt5 import QtCore, QtGui, QtWidgets, QtSql
 from qtable import Ui_MainWindow
-import sys
+import sys, glob, os, os.path
+from PyQt5.QtSql import QSqlDatabase
+
+
+def create_connection(database):
+    global final_part
+    cur_dir = os.getcwd()
+    part_1 = "DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};FIL={MS Access};"
+    part_2 = f"DBQ={cur_dir}\{database}"
+    final_part = part_1 + part_2
+
+    db = QSqlDatabase.addDatabase("QODBC")
+    db.setDatabaseName(final_part)
+    if not db.open():
+        print("Cannot open database")
+        return False
+    return True
 
 
 class TableEditor(QDialog):
@@ -55,8 +71,16 @@ class TableEditor(QDialog):
                                 "The database reported an error: %s" % self.model.lastError().text())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    import sys
 
-    editor = TableEditor('Винодельня_бд')
-    editor.show()
-    sys.exit(editor.exec_())
+    # database = 'E:\Python\Винодельня\*.accdb'  # ":memory:"
+    app = QtWidgets.QApplication(sys.argv)
+    os.chdir("E:/Python/Винодельня")
+    for file in glob.glob("*.accdb"):
+        if not create_connection(file):
+            sys.exit(app.exec_())
+
+    w = TableEditor(final_part)
+    w.show()
+    sys.exit(app.exec_())
