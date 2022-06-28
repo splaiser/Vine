@@ -1,25 +1,26 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery, QSqlTableModel, QSqlQueryModel
 from PyQt5.Qt import *
-import os, os.path, glob
-from PyQt5.QtWidgets import QLineEdit,QTableWidgetItem, QAbstractItemView, QTableWidget
-from PyQt5.QtGui import QStandardItemModel,QStandardItem, QBrush
+import os, os.path, glob, pyodbc
+from PyQt5.QtWidgets import QLineEdit, QTableWidgetItem, QAbstractItemView, QTableWidget, QSizeGrip
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
-import pyodbc
-from collections import Counter
 
 
+
+    # Функция для получения пути к файлу с БД
 def get_path():
     for file in glob.glob("*.accdb"):
         path = f"{os.getcwd()}\{file}"
         return path
 
-
+    # Класс определяющий визуальную составляющую программы
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        # Основной экран
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setFixedHeight(800)
-        MainWindow.setFixedWidth(1200)
+        MainWindow.setFixedHeight(780)
+        MainWindow.setFixedWidth(1480)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -31,11 +32,12 @@ class Ui_MainWindow(object):
         self.frame.setEnabled(True)
         self.frame.setObjectName("frame")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.frame)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(40, 40, 1061, 131))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(40, 40, 1261, 131))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
+        # Кнопка номер 3
         self.pushButton_3 = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(14)
@@ -51,7 +53,7 @@ class Ui_MainWindow(object):
             "")
         self.pushButton_3.setObjectName("pushButton_3")
         self.horizontalLayout.addWidget(self.pushButton_3)
-
+        # Кнопка номер 2
         self.pushButton_2 = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -65,7 +67,7 @@ class Ui_MainWindow(object):
             "font-size: 16px;")
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout.addWidget(self.pushButton_2)
-
+        # Кнопка номер 1
         self.pushButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -79,7 +81,7 @@ class Ui_MainWindow(object):
             "font-size: 16px;")
         self.pushButton.setObjectName("pushButton")
         self.horizontalLayout.addWidget(self.pushButton)
-
+        # Кнопка номер 4
         self.pushButton_4 = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -93,7 +95,7 @@ class Ui_MainWindow(object):
             "font-size: 16px;")
         self.pushButton.setObjectName("pushButton_4")
         self.horizontalLayout.addWidget(self.pushButton_4)
-
+        # Кнопка номер 5
         self.pushButton_5 = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -107,27 +109,28 @@ class Ui_MainWindow(object):
             "font-size: 16px;")
         self.pushButton.setObjectName("pushButton_5")
         self.horizontalLayout.addWidget(self.pushButton_5)
-
+        # Таблица
         self.tableWidget = QtWidgets.QTableView(self.frame)
-        self.tableWidget.setGeometry(QtCore.QRect(40, 220, 830, 251))
-        self.tableWidget.setMinimumSize(QtCore.QSize(1130, 551))
-        self.tableWidget.setMaximumSize(QtCore.QSize(1111, 451))
+        self.tableWidget.setGeometry(QtCore.QRect(20, 180, 1430, 581))
+        self.tableWidget.setMinimumSize(QtCore.QSize(1330, 551))
+        self.tableWidget.setMaximumSize(QtCore.QSize(1430, 581))
         self.tableWidget.setObjectName("tableWidget")
+
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
+        # Поле для поиска
         self.search=QtWidgets.QLineEdit(self)
         self.search.setGeometry(40,10,200,35)
         self.search.setPlaceholderText('Поиск по названию')
         self.search.textChanged.connect(self.searching)
-
+        # Поле для поиска
         self.search=QtWidgets.QLineEdit(self)
         self.search.setGeometry(280,10,200,35)
         self.search.setPlaceholderText('Поиск по синониму')
         self.search.textChanged.connect(self.searching2)
-
+        # Поле для поиска
         self.search=QtWidgets.QLineEdit(self)
         self.search.setGeometry(520,10,200,35)
         self.search.setPlaceholderText('Поиск по номеру образца')
@@ -148,7 +151,7 @@ class Ui_MainWindow(object):
         self.pushButton_5.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
         self.pushButton.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
 
-
+    # Окно для добавления записи
 class Dialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -188,7 +191,7 @@ class Dialog(QDialog):
         main_layout.addWidget(button_box)
         self.setLayout(main_layout)
 
-
+    # Окно для удаление записи
 class Dialog2(QDialog):
     def __init__(self):
         super().__init__()
@@ -204,13 +207,13 @@ class Dialog2(QDialog):
         main_layout.addWidget(button_box)
         self.setLayout(main_layout)
 
-
+    # Окно для подсчёта по "Месту происхождения"
 class Dialog3(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Места происхождения')
         self.table_dialog = QtWidgets.QTableView(self)
-        self.table_dialog.setFixedSize(240,640)
+        self.table_dialog.setFixedSize(480,640)
         self.table_dialog.setObjectName("dialogtableWidget")
         self.model_dialog = QStandardItemModel(self)
         cnxn = pyodbc.connect(r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
@@ -227,7 +230,8 @@ class Dialog3(QDialog):
             for j in range(2):
                 self.model_dialog.setItem(i, j, QStandardItem(str(dt[i][j])))
         self.table_dialog.setModel(self.model_dialog)
-
+        cnxn.close()
+    # Окно для подсчёта по "Таксономии"
 class Dialog4(QDialog):
     def __init__(self):
         super().__init__()
@@ -250,25 +254,27 @@ class Dialog4(QDialog):
             for j in range(2):
                 self.model_dialog.setItem(i, j, QStandardItem(str(dt[i][j])))
         self.table_dialog.setModel(self.model_dialog)
+        cnxn.close()
 
-
-
+    # Основной класс программы
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        # Подключаем визуальную составляющую
         self.setupUi(self)
+        # Подключаем Кнопки
         self.pushButton.clicked.connect(self.close)
         self.pushButton_3.clicked.connect(self.add_row)
         self.pushButton_2.clicked.connect(self.remove_row)
         self.pushButton_4.clicked.connect(self.place)
         self.pushButton_5.clicked.connect(self.taxo)
+        # Подключаем Базу данных
         self.db = QSqlDatabase.addDatabase('QODBC')
         self.db.setDatabaseName(
             r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
             f"DBQ={get_path()}")
         self.db.open()
         self.model = QSqlTableModel(self)
-
         self.model.setTable("Паспорт")
         self.model.setEditStrategy(QSqlTableModel.OnFieldChange)
         self.model.setHeaderData(0, Qt.Horizontal, "Наименование образца по русски")
@@ -277,36 +283,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.setHeaderData(3, Qt.Horizontal, "Таксономия")
         self.model.setHeaderData(4, Qt.Horizontal, "Место происхождения")
         self.model.setHeaderData(5, Qt.Horizontal, "Биологический статус образца")
-        self.model.setHeaderData(6, Qt.Horizontal, "Telefon")
-        self.model.setHeaderData(7, Qt.Horizontal, "Родословная по английски")
-        self.model.setHeaderData(8, Qt.Horizontal, "Родословная по-русски")
-        self.model.setHeaderData(9, Qt.Horizontal, "Местонахождения страховых дублетов")
-        self.model.setHeaderData(10, Qt.Horizontal, "Типы хранения")
-        self.model.setHeaderData(11, Qt.Horizontal, "Генетический паспорт сорта")
+        self.model.setHeaderData(6, Qt.Horizontal, "Родословная по английски")
+        self.model.setHeaderData(7, Qt.Horizontal, "Родословная по-русски")
+        self.model.setHeaderData(8, Qt.Horizontal, "Местонахождения страховых дублетов")
+        self.model.setHeaderData(9, Qt.Horizontal, "Типы хранения")
+        self.model.setHeaderData(10, Qt.Horizontal, "Генетический паспорт сорта")
         self.model.select()
         self.tableWidget.setModel(self.model)
         self.tableWidget.setSortingEnabled(True)
         self.tableWidget.horizontalHeader().setSectionResizeMode
-
         self.proxy=QSortFilterProxyModel(self)
         self.proxy.setSourceModel(self.model)
         self.tableWidget.setModel(self.proxy)
 
+        # Метод класса для поиска по первому столбцу
     def searching(self, text):
         self.proxy.setFilterKeyColumn(0)
         search = QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.RegExp)
         self.proxy.setFilterRegExp(search)
-
+        # Метод класса для поиска по второму столбцу
     def searching2(self, text):
         self.proxy.setFilterKeyColumn(1)
         search = QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.RegExp)
         self.proxy.setFilterRegExp(search)
-
+        # Метод класса для поиска по третьему столбцу
     def searching3(self, text):
         self.proxy.setFilterKeyColumn(2)
         search = QtCore.QRegExp(text, QtCore.Qt.CaseInsensitive, QtCore.QRegExp.RegExp)
         self.proxy.setFilterRegExp(search)
-
+        # Метод класса для добавлении строки
     def add_row(self):
         inputDialog = Dialog()
         rez = inputDialog.exec()
@@ -343,7 +348,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         r.setValue("Генетический паспорт сорта", gen_passport)
         self.model.insertRecord(-1, r)
         self.model.select()
-
+        # Метод класса для удаления строки
     def remove_row(self):
         row = self.tableWidget.currentIndex().row()
         if row == -1:
@@ -385,27 +390,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.model.select()  # Удалить запись   !!!
 
         msg = QMessageBox.information(self, 'Успех', 'Запись удалена.')
-
+        # Метод класса для для подсчёта по "Месту происхождения"
     def place(self):
         tb_dialog = Dialog3()
         rez = tb_dialog.exec()
-
+        # Метод класса для подсчёта по "Таксономии"
     def taxo(self):
         tb_dialog = Dialog4()
         rez = tb_dialog.exec()
 
-
-
-
-
-
-
-
-
+    # Запуск программы
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     w = MainWindow()
     w.show()
     sys.exit(app.exec_())
+
